@@ -66,3 +66,14 @@ BEGIN
 END;
 GO
 */
+CREATE TRIGGER trg_ActualizarTotalesVenta
+ON DetallesDeVenta
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    UPDATE Ventas
+    SET TotalProductosVendidos = (SELECT SUM(Cantidad) FROM DetallesDeVenta WHERE VentaID = Ventas.VentaID),
+        TotalVenta = (SELECT SUM(TotalDetalle) FROM DetallesDeVenta WHERE VentaID = Ventas.VentaID)
+    WHERE VentaID IN (SELECT DISTINCT VentaID FROM inserted) 
+       OR VentaID IN (SELECT DISTINCT VentaID FROM deleted);
+END;
